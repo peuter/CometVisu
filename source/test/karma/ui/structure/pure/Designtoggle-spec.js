@@ -24,6 +24,13 @@
  */
 describe("testing a designtoggle widget", function() {
 
+  beforeEach(function() {
+    // make resourcemanager return null
+    spyOn(qx.util.ResourceManager.getInstance(), "toUri").and.callFake(function() {
+      return null;
+    });
+  });
+
   it("should test the designtoggle creator", function() {
     var res = this.createTestWidgetString("designtoggle", {}, "<label>Test</label>");
     var widget = qx.bom.Html.clean([res[1]])[0];
