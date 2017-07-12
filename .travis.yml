@@ -13,6 +13,9 @@ env:
   - CV_BUILD="test" CV_BROWSER=Chrome_travis CV_VERSION=stable
   - CV_BUILD="test" CV_BROWSER=Chrome_travis CV_VERSION=beta
   - CV_BUILD="test" CV_BROWSER=Chrome_travis CV_VERSION=unstable
+  - CV_BUILD="test" CV_BROWSER=Firefox CV_VERSION=latest
+  - CV_BUILD="test" CV_BROWSER=Firefox CV_VERSION=esr-latest
+  - CV_BUILD="test" CV_BROWSER=Firefox CV_VERSION=beta-latest
   - CV_BUILD="docs" ENCRYPTION_LABEL="4c79fec0aeb9" COMMIT_AUTHOR_EMAIL="generator@cometvisu.org" CV_BROWSER=Chrome_travis CV_VERSION=stable
 before_install:
 - sudo apt-get --only-upgrade install libnss3
