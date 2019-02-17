@@ -4,9 +4,16 @@ set -e # Exit with nonzero exit code if anything fails
 SOURCE_BRANCH="develop"
 TARGET_BRANCH="gh-pages"
 REPO_SLUG="CometVisu/CometVisu"
+CV="./cv"
+DOCKER_RUN="./bin/docker-run"
+
+if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then
+    echo "Skipping deploy in cron build"
+    exit 0
+fi
 
 # Pull requests and commits to other branches shouldn't try to deploy, just build to verify
-if [ "$TRAVIS_PULL_REQUEST" != "false" ] || ( [ "$TRAVIS_BRANCH" != "$SOURCE_BRANCH" ] && [ "$TRAVIS_BRANCH" != "master" ] ); then
+if [ "$TRAVIS_PULL_REQUEST" != "false" ] || ( [ "$TRAVIS_BRANCH" != "$SOURCE_BRANCH" ] && [[ ! "$TRAVIS_BRANCH" =~ release-[0-9\.]+ ]]); then
     echo "Skipping deploy;"
     exit 0
 fi
@@ -14,10 +21,6 @@ fi
 if [ "$TRAVIS_REPO_SLUG" != "$REPO_SLUG" ]; then
     echo "Not in main repository => skipping deploy;"
     exit 0
-fi
-
-if [ "$TRAVIS_BRANCH" != "master" ]; then
-    echo "ATTENTION! Deploying docs from non master branch. Please change this!!!"
 fi
 
 
@@ -37,17 +40,26 @@ cd ..
 #rm -rf out/de || exit 0
 #rm -rf out/en || exit 0
 
+VERSION=`${CV} doc --get-version`
+VERSION_PATH=`${CV} doc --get-target-version`
+
+# check if this version is new (we only check the "de" dir)
+NEW_VERSION=0
+if [ ! -d "out/de/$VERSION_PATH" ]; then
+    NEW_VERSION=1
+fi;
+
 # Run our creation script
 echo "generating german manual to extract screenshot examples"
-./cv doc --doc-type manual -f -l de
+${CV} doc --doc-type manual -f -l de --target-version=${VERSION_PATH}
 echo "generating api"
-./cv doc --doc-type source
+${CV} doc --doc-type source
 echo "updating english manual from source code doc comments"
-./cv doc --from-source
+${CV} doc --from-source
 echo "generating english manual, including screenshot generation for all languages"
-./cv doc --doc-type manual -c -f -l en
+${DOCKER_RUN} ${CV} doc --doc-type manual -c -f -l en -t build --target-version=${VERSION_PATH}
 echo "generating german manual again with existing screenshots"
-./cv doc --doc-type manual -f -l de
+${CV} doc --doc-type manual -f -l de --target-version=${VERSION_PATH}
 
 echo "generating feature yml file for homepage"
 ./cv doc --generate-features
@@ -61,20 +73,22 @@ cd out
 git config user.name "Travis CI"
 git config user.email "$COMMIT_AUTHOR_EMAIL"
 
-# If there are no changes to the compiled out (e.g. this is a README update) then just bail.
-# as the changesets on master are too big we skip this check to prevent timeouts
-if [ "$TRAVIS_BRANCH" != "master" ]; then
+# If there are no changes to the compiled out (e.g. this is a README update) then just bail out.
+# as the changesets on new versions are too big we skip this check to prevent timeouts
+if [ "$NEW_VERSION" -eq 0 ]; then
     echo "checking diff"
-    if [ -z `git diff --exit-code` ]; then
-        echo "No changes to the output on this push; exiting."
-        exit 0
+    if [ `git diff --shortstat | wc -l` -eq 0 ]; then
+       echo "No changes to the output on this push; exiting."
+       exit 0
     fi
 fi
 
 # Commit the "changes", i.e. the new version.
 # The delta will show diffs between new and old versions.
+echo "adding all changes to git changeset"
 git add --all .
-git commit -m "Deploy to GitHub Pages: ${SHA}"
+echo "committing changeset"
+git commit -q -m "Deploy to GitHub Pages: ${SHA}"
 
 # Get the deploy key by using Travis's stored variables to decrypt deploy_key.enc
 ENCRYPTED_KEY_VAR="encrypted_${ENCRYPTION_LABEL}_key"
@@ -87,4 +101,5 @@ eval `ssh-agent -s`
 ssh-add deploy_key
 
 # Now that we're all set up, we can push.
+echo "pushing changes to remote repository"
 git push $SSH_REPO $TARGET_BRANCH

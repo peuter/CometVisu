@@ -19,11 +19,18 @@
 
 import os
 import logging
-import ConfigParser
+import configparser
 import codecs
+
+import subprocess
+from json import dumps
+from semver import compare
 import yaml
 
-import sh
+try:
+    import sh
+except:
+    import pbs as sh
 import shutil
 import json
 import sys
@@ -32,9 +39,16 @@ from lxml import etree
 from argparse import ArgumentParser
 from . import Command
 from scaffolding import Scaffolder
+from sphinx import main
+try:
+    # Python 2.6-2.7
+    from HTMLParser import HTMLParser
+    html = HTMLParser()
+except ImportError:
+    # Python 3
+    import html
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-
 
 class DocParser:
     """
@@ -43,7 +57,7 @@ class DocParser:
     """
 
     def __init__(self, widget=None, plugin=None):
-        self.config = ConfigParser.ConfigParser()
+        self.config = configparser.ConfigParser()
         self.config.read(os.path.join(root_dir, 'utils', 'config.ini'))
         self.sections = {}
         self.lines = []
@@ -116,6 +130,7 @@ class DocParser:
 
 class DocGenerator(Command):
     _source_version = None
+    _doc_version = None
 
     def __init__(self):
         super(DocGenerator, self).__init__()
@@ -123,15 +138,17 @@ class DocGenerator(Command):
         logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
     def _get_doc_version(self):
-        git = sh.Command("git")
-        branch = git("rev-parse", "--abbrev-ref", "HEAD").strip() if os.environ.get('TRAVIS_BRANCH') is None \
-            else os.environ.get('TRAVIS_BRANCH')
+        if self._doc_version is None:
+            git = sh.Command("git")
+            branch = git("rev-parse", "--abbrev-ref", "HEAD").strip() if os.environ.get('TRAVIS_BRANCH') is None \
+                else os.environ.get('TRAVIS_BRANCH')
 
-        if branch == "develop":
-            return self.config.get("DEFAULT", "develop-version-mapping")
-        else:
-            # read version
-            return self._get_source_version()
+            if branch == "develop":
+                self._doc_version = self.config.get("DEFAULT", "develop-version-mapping")
+            else:
+                # read version
+                self._doc_version = self._get_source_version()
+        return self._doc_version
 
     def _get_source_version(self):
         if self._source_version is None:
@@ -140,7 +157,16 @@ class DocGenerator(Command):
                 self._source_version = data['version']
         return self._source_version
 
-    def _run(self, language, target_dir, browser, skip_screenshots=True, force=False):
+    def _get_doc_target_path(self):
+        """ returns the target sub directory where the documentation should be stored."""
+        ver = self._get_doc_version()
+        match = re.match("([0-9]+.[0-9]+).[0-9]+.*", ver)
+        if match:
+            return match.group(1)
+        else:
+            return ver
+
+    def _run(self, language, target_dir, browser, skip_screenshots=True, force=False, screenshot_build="source", target_version=None):
 
         sphinx_build = sh.Command("sphinx-build")
 
@@ -153,7 +179,7 @@ class DocGenerator(Command):
             target_dir = os.path.join(self.root_dir, self.config.get(section, "target"))
         else:
             target_dir = os.path.join(self.root_dir, target_dir)
-        target_dir = target_dir.replace("<version>", self._get_doc_version())
+        target_dir = target_dir.replace("<version>", self._get_doc_target_path() if target_version is None else target_version)
         print("generating doc to %s" % target_dir)
 
         if not os.path.exists(source_dir):
@@ -169,15 +195,25 @@ class DocGenerator(Command):
             os.makedirs(target_dir)
 
         # first run generates the widget-example configs
+        print ('================================================================================')
+        print ('sphinx_build: first run')
+        print ('================================================================================')
         sphinx_build("-b", target_type, source_dir, target_dir, _out=self.process_output, _err=self.process_output)
 
         if not skip_screenshots:
             grunt = sh.Command("grunt")
             # generate the screenshots
-            grunt("screenshots", "--subDir=manual", "--browserName=%s" % browser, _out=self.process_output, _err=self.process_output)
+            grunt("--force", "screenshots", "--subDir=manual", "--browserName=%s" % browser,
+                  "--target=%s" % screenshot_build, _out=self.process_output, _err=self.process_output)
 
             # 2dn run with access to the generated screenshots
+            print ('================================================================================')
+            print ('sphinx_build: second run')
+            print ('================================================================================')
             sphinx_build("-b", target_type, source_dir, target_dir, _out=self.process_output, _err=self.process_output)
+
+        with open(os.path.join(target_dir, "..", "version"), "w+") as f:
+            f.write(self._get_source_version())
 
     def from_source(self, path, plugin=False):
         """
@@ -403,6 +439,80 @@ class DocGenerator(Command):
 
         return None
 
+    def _sort_versions(self, a, b):
+        va = a.split("|")[0]
+        vb = b.split("|")[0]
+        if va == "latest":
+            return 1
+        elif vb == "latest":
+            return -1
+        else:
+            return compare(va, vb)
+
+    def process_versions(self, path):
+        root, dirs, files = os.walk(path).next()
+        for lang_dir in dirs:
+            if lang_dir[0:1] != "." and len(lang_dir) == 2:
+                print("checking versions in language: %s" % lang_dir)
+                # collect versions and symlinks
+                root, dirs, files = os.walk(os.path.join(path, lang_dir)).next()
+                symlinks = {}
+                versions = []
+                special_versions = []
+                for version_dir in dirs:
+                    version = version_dir
+                    if os.path.exists(os.path.join(path, lang_dir, version_dir, "version")) and re.match("^[0-9]+.[0-9]+.?[0-9]*$", version) is not None:
+                        with open(os.path.join(path, lang_dir, version_dir, "version")) as f:
+                            version = f.read()
+                    if os.path.islink(os.path.join(root, version_dir)):
+                        symlinks[version_dir] = os.readlink(os.path.join(root, version_dir)).rstrip("/")
+                    elif re.match("^[0-9]+.[0-9]+.*$", version) is not None:
+                        versions.append(version if version == version_dir else "%s|%s" % (version, version_dir))
+                    else:
+                        special_versions.append(version if version == version_dir else "%s|%s" % (version, version_dir))
+
+                # max_version = max_ver(versions)
+                versions.sort(self._sort_versions)
+                max_version = None
+                max_version_path = None
+                found_max = False
+                if len(versions) > 0:
+                    for version in versions[::-1]:
+                        max_version = version
+                        if "|" in max_version:
+                            max_version, max_version_path = max_version.split("|")
+                        else:
+                            max_version_path = max_version
+                        if re.match(".+-RC[0-9]+$", max_version) is None:
+                            found_max = True
+                            break
+
+                print("versions found: %s (%s)" % (versions, special_versions))
+
+                if found_max is True and max_version_path is not None:
+                    # checking current symlink to max version
+                    if 'current' not in symlinks or symlinks['current'] != max_version_path:
+                        print("setting 'current' symlink to '%s'" % max_version_path)
+                        cwd = os.getcwd()
+                        os.chdir(root)
+                        try:
+                            os.remove('current')
+                        except Exception:
+                            pass
+                        os.symlink(max_version_path, 'current')
+                        symlinks['current'] = max_version_path
+                        os.chdir(cwd)
+
+                # saving versions to json file
+                try:
+                    with open(self.config.get("DEFAULT", "versions-file-%s" % lang_dir), "w+") as f:
+                        f.write(dumps({
+                            "versions": versions+special_versions,
+                            "symlinks": symlinks
+                        }))
+                except configparser.NoOptionError:
+                    pass
+
     def run(self, args):
         parser = ArgumentParser(usage="%(prog)s - CometVisu documentation generator")
 
@@ -424,6 +534,11 @@ class DocGenerator(Command):
 
         parser.add_argument("--from-source", dest="from_source", action="store_true", help="generate english manual from source comments")
         parser.add_argument("--generate-features", dest="features", action="store_true", help="generate the feature YAML file")
+        parser.add_argument("--process-versions", dest="process_versions", action="store_true", help="update symlinks to latest/current docs and weite version files")
+        parser.add_argument("--get-version", dest="get_version", action="store_true", help="get version")
+        parser.add_argument("--screenshot-build", "-t", dest="screenshot_build", default="source", help="Use 'source' od 'build' to generate screenshots")
+        parser.add_argument("--target-version", dest="target_version", help="version target subdir, this option overrides the auto-detection")
+        parser.add_argument("--get-target-version", dest="get_target_version", action="store_true", help="returns version target subdir")
 
         options = parser.parse_args(args)
 
@@ -446,12 +561,23 @@ class DocGenerator(Command):
                                default_style='"',
                                allow_unicode=True)
 
+        elif options.get_version:
+            print(self._get_doc_version())
+
+        elif options.get_target_version:
+            print(self._get_doc_target_path())
+
+        elif options.process_versions:
+            self.process_versions(self.config.get("DEFAULT", "doc-dir"))
+
         elif options.from_source:
             self.from_source(os.path.join("src", "structure", "pure"))
             self.from_source(os.path.join("src", "plugins"), plugin=True)
 
         elif 'doc' not in options or options.doc == "manual":
-            self._run(options.language, options.target, options.browser, force=options.force, skip_screenshots=not options.complete)
+            self._run(options.language, options.target, options.browser, force=options.force,
+                      skip_screenshots=not options.complete, screenshot_build=options.screenshot_build,
+                      target_version=options.target_version)
             sys.exit(0)
 
         elif options.doc == "source":
@@ -459,7 +585,7 @@ class DocGenerator(Command):
             if options.target is not None:
                 grunt("api-doc", "--subDir=jsdoc", "--browserName=%s" % options.browser, "--targetDir=%s" % options.target, _out=self.process_output, _err=self.process_output)
             else:
-                target_dir = self.config.get("api", "target").replace("<version>", self._get_doc_version())
+                target_dir = self.config.get("api", "target").replace("<version>", self._get_doc_target_path())
                 grunt("api-doc", "--subDir=jsdoc", "--browserName=%s" % options.browser, "--targetDir=%s" % target_dir, _out=self.process_output, _err=self.process_output)
         else:
             self.log.error("generation of '%s' documentation is not available" % options.type)
