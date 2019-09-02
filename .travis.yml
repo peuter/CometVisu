@@ -33,11 +33,13 @@ jobs:
     - "./generate.py lint"
   - stage: test
     name: 'Unit Tests: Chrome stable'
+    addons:
+      chrome: stable
     env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=stable
     script: &1
-    - sudo ./utils/travis/browser-setup.sh
-    - export CHROME_BIN=`pwd`/chrome/google-chrome
-    - export PATH=`pwd`/firefox:`pwd`/chrome:$PATH
+#    - sudo ./utils/travis/browser-setup.sh
+#    - export CHROME_BIN=`pwd`/chrome/google-chrome
+#    - export PATH=`pwd`/firefox:`pwd`/chrome:$PATH
     - google-chrome --version
     - source temp-python/bin/activate
     - "./generate.py source -sI"
@@ -46,30 +48,34 @@ jobs:
     - if [ "$CV_BUILD" == "test" ] && [ "$CV_VERSION" == "stable" ] ; then grunt coveralls; fi
   - stage: test
     name: 'Unit Tests: Chrome beta'
+    addons:
+      chrome: beta
     env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=beta
     script: *1
-  - stage: test
-    name: 'Unit Tests: Chrome unstable'
-    env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=unstable
-    script: *1
   - name: 'End-to-end Tests: Chrome stable'
+    addons:
+      chrome: stable
     env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=stable
     script: &2
-    - sudo ./utils/travis/browser-setup.sh
-    - export CHROME_BIN=`pwd`/chrome/google-chrome
+#    - sudo ./utils/travis/browser-setup.sh
+#    - export CHROME_BIN=`pwd`/chrome/google-chrome
     - source temp-python/bin/activate
     - "./generate.py source -sI"
     - deactivate
-    - export CHROME_VERSION=$($CHROME_BIN --version | awk '{ print $3 }' | cut -d'.' -f 1,2,3)
+    - export CHROME_VERSION=$(google-chrome --version | awk '{ print $3 }' | cut -d'.' -f 1,2,3)
     - export DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
     - echo "using chrome driver version $DRIVER_VERSION"
     - "node ./node_modules/protractor/bin/webdriver-manager update --gecko=false --versions.chrome=${DRIVER_VERSION}"
     - grunt e2e-chrome
   - name: 'End-to-end Tests: Chrome beta'
+    addons:
+      chrome: beta
     env: CV_BUILD=test CV_BROWSER=Chrome_travis CV_VERSION=beta
     script: *2
   - stage: deploy
     name: "[DOCS] - Generate and publish manual and API-viewer"
+    addons:
+      chrome: stable
     env: CV_BUILD=docs ENCRYPTION_LABEL=4c79fec0aeb9 COMMIT_AUTHOR_EMAIL=generator@cometvisu.org CV_BROWSER=Chrome_travis CV_VERSION=stable
     script:
     - docker pull cometvisu/dev-helper
