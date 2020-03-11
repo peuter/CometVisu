@@ -387,33 +387,8 @@ qx.Class.define('cv.TemplateEngine', {
 
       settings.scriptsToLoad = [];
       settings.stylesToLoad = [];
-      var design = cv.Config.getDesign();
-      if (design) {
-        var baseUri = 'designs/' + design;
-        settings.stylesToLoad.push(baseUri + '/basic.css');
-        this.debug('cv.Config.mobileDevice: ' + cv.Config.mobileDevice);
-        if (cv.Config.mobileDevice) {
-          settings.stylesToLoad.push(baseUri + '/mobile.css');
-          document.querySelector('body').classList.add('mobile');
-        }
-        settings.stylesToLoad.push(baseUri + '/custom.css');
-        settings.scriptsToLoad.push('designs/' + design + '/design_setup.js');
+      this.addDesignUrls(cv.Config.getDesign());
 
-        cv.util.ScriptLoader.getInstance().addListenerOnce("designError", function(ev) {
-          if (ev.getData() === design) {
-            this.error('Failed to load "'+design+'" design! Falling back to simplified "pure"');
-
-            baseUri = 'designs/pure';
-            var alternativeStyles = [baseUri+'/basic.css'];
-            if (cv.Config.mobileDevice) {
-              alternativeStyles.push(baseUri+'/mobile.css');
-            }
-            alternativeStyles.push(baseUri+'/custom.css');
-            cv.util.ScriptLoader.getInstance().addStyles( alternativeStyles );
-            cv.util.ScriptLoader.getInstance().addScripts(baseUri+"/design_setup.js");
-          }
-        }, this);
-      }
       var metaParser = new cv.parser.MetaParser();
 
       // start with the plugins
@@ -421,6 +396,53 @@ qx.Class.define('cv.TemplateEngine', {
       // and then the rest
       metaParser.parse(loaded_xml, done);
       this.debug("parsed");
+    },
+
+    addDesignUrls: function (design) {
+      if (design) {
+        var settings = cv.Config.configSettings;
+        settings.stylesToLoad = settings.stylesToLoad.concat(this._getDesignStyles(design, cv.Config.mobileDevice));
+        this.debug('cv.Config.mobileDevice: ' + cv.Config.mobileDevice);
+        if (cv.Config.mobileDevice) {
+          document.querySelector('body').classList.add('mobile');
+        }
+        settings.scriptsToLoad.push('designs/' + design + '/design_setup.js');
+
+        cv.util.ScriptLoader.getInstance().addListenerOnce("designError", function(ev) {
+          if (ev.getData() === design) {
+            this.error('Failed to load "'+design+'" design! Falling back to simplified "pure"');
+            cv.util.ScriptLoader.getInstance().addStyles(this._getDesignStyles('pure', cv.Config.mobileDevice));
+            cv.util.ScriptLoader.getInstance().addScripts('designs/pure/design_setup.js');
+          }
+        }, this);
+      }
+    },
+
+    /**
+     * Unloads css files from the oldDesign and adds the files for the new design to the stylesToLoad array
+     * @param oldDesign
+     * @param newDesign
+     */
+    replaceDesign: function (oldDesign, newDesign) {
+      var scriptLoader = cv.util.ScriptLoader.getInstance();
+      this._getDesignStyles(oldDesign, true).forEach(scriptLoader.removeFile, scriptLoader);
+      this.addDesignUrls(newDesign);
+    },
+
+    /**
+     * Returns all css files for a design
+     * @param design {String} name if the design
+     * @param mobile {Boolean} load mobile css
+     * @protected
+     */
+    _getDesignStyles: function (design, mobile) {
+      var baseUri = 'designs/' + design;
+      var files = [baseUri + '/basic.css'];
+      if (mobile) {
+        files.push(baseUri + '/mobile.css');
+      }
+      files.push(baseUri + '/custom.css');
+      return files;
     },
 
     /**

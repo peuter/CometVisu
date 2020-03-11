@@ -54,8 +54,7 @@ qx.Class.define('cv.ConfigCache', {
       localStorage.setItem(cv.Config.configSuffix+".body", document.querySelector('body').innerHTML);
     },
 
-    restore: function() {
-      var body = document.querySelector("body");
+    restore: function(noApply) {
       var model = cv.data.Model.getInstance();
       var cache = this.getData();
       cv.Config.configSettings = cache.configSettings;
@@ -81,7 +80,12 @@ qx.Class.define('cv.ConfigCache', {
           })
         }, this);
       }
-      body.innerHTML = cv.ConfigCache.getBody();
+      if (noApply === true) {
+        return cv.ConfigCache.getBody();
+      } else {
+        var body = document.querySelector("body");
+        body.innerHTML = cv.ConfigCache.getBody();
+      }
     },
     
     save: function(key, data) {

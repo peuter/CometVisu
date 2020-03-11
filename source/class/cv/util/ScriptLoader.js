@@ -32,6 +32,7 @@ qx.Class.define('cv.util.ScriptLoader', {
     this.__scriptQueue = new qx.data.Array();
     this.__loaders = new qx.data.Array();
     this.__delayedScriptQueue = new qx.data.Array();
+    this.__includedFiles = {};
   },
 
   /*
@@ -67,13 +68,27 @@ qx.Class.define('cv.util.ScriptLoader', {
     __scriptQueue: null,
     __loaders: null,
     __listener : null,
+    __includedFiles : null,
 
     addStyles: function(styleArr) {
       var queue = (typeof styleArr === 'string' ? [ styleArr ] : styleArr.concat());
       var suffix = (cv.Config.forceReload === true) ? '?'+Date.now() : '';
       queue.forEach(function(style) {
-        qx.bom.Stylesheet.includeFile(qx.util.ResourceManager.getInstance().toUri(style) + suffix);
+        var filePath = qx.util.ResourceManager.getInstance().toUri(style)
+        qx.bom.Stylesheet.includeFile(filePath + suffix);
+        this.__includedFiles[filePath] = filePath + suffix;
+        this.debug('loading style ' + filePath + suffix);
       }, this);
+    },
+
+    removeFile: function(href) {
+      var filePath = qx.util.ResourceManager.getInstance().toUri(href);
+      if (this.__includedFiles.hasOwnProperty(filePath)) {
+        document.querySelectorAll('head link[href="' + this.__includedFiles[filePath] + '"]').forEach(function (el) {
+          el.remove();
+          delete this.__includedFiles[filePath];
+        }, this);
+      }
     },
 
     addScripts: function(scriptArr, order) {

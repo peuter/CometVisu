@@ -368,7 +368,12 @@ qx.Class.define("cv.Application",
         if (cv.Config.enableCache && cv.ConfigCache.isCached()) {
           // load settings
           this.debug("using cache");
-          cv.ConfigCache.restore();
+          var html = cv.ConfigCache.restore(true);
+          this.loadStyles();
+          cv.Config.configSettings.stylesToLoad = [];
+          var body = document.querySelector("body");
+          body.innerHTML = html;
+
           // initialize NotificationCenter
           cv.ui.NotificationCenter.getInstance();
           cv.ui.ToastManager.getInstance();
@@ -444,11 +449,8 @@ qx.Class.define("cv.Application",
           this.loadPlugins();
           if (cv.Config.clientDesign && cv.Config.clientDesign !== cv.Config.configSettings.clientDesign) {
             // we have to replace the cached design scripts styles to load
-            var styles = [];
-            cv.Config.configSettings.stylesToLoad.forEach(function(style) {
-              styles.push(style.replace("designs/"+cv.Config.configSettings.clientDesign, "designs/"+cv.Config.clientDesign));
-            }, this);
-            this.loadStyles(styles);
+            engine.replaceDesign(cv.Config.configSettings.clientDesign, cv.Config.clientDesign);
+            this.loadStyles();
 
             var scripts = [];
             cv.Config.configSettings.scriptsToLoad.forEach(function(style) {
