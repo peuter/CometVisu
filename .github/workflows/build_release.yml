@@ -1,18 +1,24 @@
-name: Build CometVisu release from tag
+name: Publish release
 on:
   push:
     tags:
       - 'v*'
   release:
-    types: [prereleased,created,published]
 env:
   NODE_VERSION: '14.15'
-
 jobs:
+  info:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Ref: ${{ github.ref }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Event-type: ${{ fromJSON(github.event) }}"
+
   build:
     name: "Build release"
     runs-on: ubuntu-latest
-    if: startsWith('refs/tags/', github.ref)
+    if: ${{false}} #startsWith('refs/tags/', github.ref)
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
