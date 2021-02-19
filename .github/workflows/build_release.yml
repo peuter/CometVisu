@@ -14,15 +14,11 @@ jobs:
         run: |
           echo "Ref: ${GITHUB_REF##*/}"
           echo "Event: ${GITHUB_EVENT_NAME}"
-          echo "Event: ${GITHUB_EVENT_DUMP}"
-        env:
-          EVENT_DUMP: ${{ fromJSON(github.event) }}
-
 
   build:
     name: "Build release"
     runs-on: ubuntu-latest
-    if: ${{false}} #startsWith('refs/tags/', github.ref)
+    if: tartsWith('refs/tags/', github.ref)
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
