@@ -6,6 +6,8 @@ on:
       - develop
       - master
       - release-*
+    paths-ignore:
+      - '.github/**'
     tags-ignore:
       - 'v*'
 env:
