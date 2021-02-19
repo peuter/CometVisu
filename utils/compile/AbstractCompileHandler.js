@@ -85,9 +85,18 @@ qx.Class.define("cv.Version", {
     if (!type) {
       type = this._config.targetType
     }
+    const command = this._compilerApi.getCommand();
+    const isDeploy = command instanceof qx.tool.cli.commands.Deploy;
+    if (isDeploy) {
+      type = "build"
+    }
     this._config.targets.some(target => {
       if (target.type === type) {
-        targetDir = target.outputPath
+        if (isDeploy) {
+          targetDir = command.argv.out || typeof target.getDeployDir == "function" && target.getDeployDir();
+        } else {
+          targetDir = target.outputPath
+        }
       }
     })
     return targetDir
