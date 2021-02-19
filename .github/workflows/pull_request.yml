@@ -1,4 +1,4 @@
-name: Test CometVisu pull request
+name: Test Pull Request
 on: pull_request
 env:
   NODE_VERSION: '14.15'
