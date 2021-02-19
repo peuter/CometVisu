@@ -7,15 +7,6 @@ on:
 env:
   NODE_VERSION: '14.15'
 jobs:
-  info:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Info
-        run: |
-          echo "Ref: ${GITHUB_REF} - ${REF}"
-          echo "Event: ${GITHUB_EVENT_NAME}"
-        env:
-          REF: ${{ github.ref }}
 
   build:
     name: "Build release"
@@ -45,11 +36,12 @@ jobs:
           php-version: 7.4
       - name: Build CometVisu
         run: grunt release-cv
+      - run: ls -la ./
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./CometVisu-*.(tar.gz|zip)
+          file: ./CometVisu-*.{tar.gz,zip}
           file_glob: true
           tag: ${{ github.ref }}
           overwrite: true
