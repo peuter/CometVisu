@@ -18,7 +18,7 @@ jobs:
   build:
     name: "Build release"
     runs-on: ubuntu-latest
-    if: tartsWith('refs/tags/', github.ref)
+    if: startsWith('refs/tags/', github.ref)
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
