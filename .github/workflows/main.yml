@@ -1,5 +1,13 @@
 name: Test & Build
-on: [push, workflow_dispatch]
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - master
+      - release-*
+    tags-ignore:
+      - 'v*'
 env:
   NODE_VERSION: '14.15'
 jobs:

@@ -4,13 +4,16 @@ on:
     tags:
       - 'v*'
   release:
+    types: [prereleased]
+
 env:
   NODE_VERSION: '14.15'
 jobs:
   info:
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      - name: Info
+        run: |
           echo "Ref: ${{ github.ref }}"
           echo "Event: ${{ github.event_name }}"
           echo "Event-type: ${{ fromJSON(github.event) }}"
