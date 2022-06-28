@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 /*****************************************************************************/
 /* rsslog.php - A simple log message reciever and sender via RSS             */
 /*                                                                           */
@@ -85,7 +85,7 @@ if( isset($_GET['info']) )
   insert( $dbh, $log_content, $log_title, $log_tags, $log_mapping, $log_state );
 } else if( isset($_GET['dump']) )
 {
-  $result = retrieve( $dbh, $log_filter, NULL, NULL, true );
+  $result = retrieve( $dbh, "", NULL, NULL, true );
   ?>
 <html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <title>RSSLog Information</title>
@@ -367,7 +367,7 @@ function insert( $dbh, $content, $title, $tags, $mapping, $state, $time = "datet
   $ok = $sth->execute( array($content, $title, implode(",",$tags), $mapping, $state) );
   
   if (!$ok)
-    die("Cannot execute query. " . end($dbh->errorInfo()) . " (Title: $itle Content: $content Tags: $tags State: $state)");
+    die("Cannot execute query. " . end($dbh->errorInfo()) . " (Title: $title Content: $content Tags: $tags State: $state)");
 }
 
 // return a handle to all the data
@@ -415,8 +415,10 @@ function delete( $dbh, $timestamp, $filter )
     $filterString = '1=1';
   } else {
     $filters = explode(',', $filter); // accept filters by separated by ,
-    function substrmatch($s) { return "%$s%"; };
-    $filters = array_map( substrmatch, $filters );
+
+    $filters = array_map(function($s) {
+      return "%$s%";
+    }, $filters );
     $filterString = '(tags LIKE ?) ' . str_repeat( 'OR (tags LIKE ?) ', count( $filters )-1 );
   }
 

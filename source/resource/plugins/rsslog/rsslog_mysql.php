@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 /*****************************************************************************/
 /* rsslog.php - A simple log message reciever and sender via RSS             */
 /*                                                                           */
@@ -70,11 +70,11 @@ $mysql_srv = "mysql.local.lan";
 error_reporting(0);
 
 // MySQL connection
-mysql_connect($mysql_srv, $mysql_user, $mysql_pass) or
-	die ("database connection failed!" . mysql_error());
-mysql_select_db($mysql_db) or
-	die ("database cannot be located!" . mysql_error());
-mysql_set_charset('utf8'); 
+$db = mysqli_connect($mysql_srv, $mysql_user, $mysql_pass) or
+	die ("database connection failed!" . mysqli_error($db));
+mysqli_select_db($db, $mysql_db) or
+	die ("database cannot be located!" . mysqli_error($db));
+mysqli_set_charset($db, 'utf8');
 	
 if(isset($_GET['c']))
 { 
@@ -95,14 +95,14 @@ if(isset($_GET['c']))
 else if(isset($_GET['dump']))
 {
 	// dump database in HTML table
-	$result = retrieve($mysql_table, $log_filter, NULL);
+	$result = retrieve($mysql_table, "", NULL);
 	?>
 	<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8" /></head><body>
 	<table border="1">
 	<?php
 	$records = 0;
 	echo '<tr><th>ID</th><th>DateTime</th><th>Timestamp</th><th>Title</th><th>Content</th><th>Tags</th><th>State</th></tr>';
-	while( $row = mysql_fetch_array($result) )
+	while( $row = mysqli_fetch_array($result) )
 	{
 		echo '<tr>';
 		echo '<td>' . $row['id'] . '</td>';
@@ -151,7 +151,7 @@ else if(isset($_GET['j']))
 	// retrieve data
 	$result = retrieve($mysql_table, $log_filter, $state);
 	$first = true;
-	while($row = mysql_fetch_array($result))
+	while($row = mysqli_fetch_array($result))
 	{
 		if(!$first) echo ",\n";
 		echo '{';
@@ -198,7 +198,7 @@ else if (isset($_GET['d'])) {
 	{
 		die("wrong format - id has to be numeric");
 	}
-	deleteentry($mysql_table, $db, $id);
+	deleteentry($mysql_table, $id);
 	?>
 	Successfully deleted ID=<?php echo $id; ?>.
 	<?php
@@ -225,7 +225,7 @@ else
 		<link><?php echo 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']; ?></link>
 		<description>RSS supplied logs</description>
 	<?php
-	while($row = mysql_fetch_array($result))
+	while($row = mysqli_fetch_array($result))
 	{
 		$tags = ' [ id=' . $row['id']. ',state=' . $row['state'];
 		if ($row['tags'])
@@ -245,33 +245,35 @@ else
 	<?php
 } 
 
-mysql_close();
+mysqli_close($db);
 
 // insert a new log entry
 function insert($mysql_table, $content, $title, $tags, $state)
 {
+    global $db;
 	$q = 'INSERT INTO '.$mysql_table.'(content, title, tags, t, state) VALUES ( ' .
-	   "  '" . mysql_escape_string( $content ) . "'," .
-	   "  '" . mysql_escape_string( $title ) . "'," .
-	   "  '" . mysql_escape_string( implode(",",$tags) ) . "'," .
+	   "  '" . mysqli_escape_string($db,  $content ) . "'," .
+	   "  '" . mysqli_escape_string($db,  $title ) . "'," .
+	   "  '" . mysqli_escape_string($db,  implode(",",$tags) ) . "'," .
 	   "  '" . date(DATE_ATOM, time()) . "'," .
 	   "  $state" .
 	   ')';
 	print $q;
-	$ok = mysql_query($q);
+	$ok = mysqli_query($db, $q);
 
 	if (!$ok)
 	{
-		die("Cannot execute query. (Title: $title Content: $content Tags: $tags State: $state)" . mysql_error());
+		die("Cannot execute query. (Title: $title Content: $content Tags: $tags State: $state)" . mysqli_error($db));
 	}
 }
 
 // return a handle to all the data
 function retrieve($mysql_table, $filter, $state)
 {
+    global $db;
 	$filters = explode(',', $filter); // accept filters by separated by ,
 	foreach ($filters as $i => $val) {
-		$filters[$i] = " (tags LIKE '%" . mysql_escape_string($val) . "%') ";
+		$filters[$i] = " (tags LIKE '%" . mysqli_escape_string($db, $val) . "%') ";
 	}
   
 	$q = "SELECT id, title, content, tags, state, t FROM " . $mysql_table . " WHERE (" . implode('OR', $filters) . ")"; // ORIG
@@ -285,53 +287,57 @@ function retrieve($mysql_table, $filter, $state)
 	{
 		$q .= " LIMIT 100";
 	}
-	return mysql_query($q);
+	return mysqli_query($db, $q);
 }
 
 // delete all log lines older than the timestamp and optional a filter
 function delete($mysql_table, $timestamp, $filter)
 {
+    global $db;
 	$filters = explode(',', $filter); // accept filters by separated by ,
 	foreach ($filters as $i => $val) {
-		$filters[$i] = " (tags LIKE '%" . mysql_escape_string($val) . "%') ";
+		$filters[$i] = " (tags LIKE '%" . mysqli_escape_string($db, $val) . "%') ";
 	}
 
 	$q = "DELETE from " . $mysql_table . " WHERE t < datetime($timestamp, 'unixepoch') AND (" . implode('OR', $filters) . ")";
-	$ok = mysql_query($q);
+	$ok = mysqli_query($db, $q);
   
 	if (!$ok)
 	{
-		die("Cannot execute query." . mysql_error());
+		die("Cannot execute query." . mysqli_error($db));
 	}
 }
 
 // delete a single entry
 function deleteentry($mysql_table, $id)
 {
+    global $db;
 	$q = "DELETE from " . $mysql_table . " WHERE id = $id";
-	$ok = mysql_query($q);
+	$ok = mysqli_query($db, $q);
   
 	if (!$ok)
 	{
-		die("Cannot execute query." . mysql_error());
+		die("Cannot execute query." . mysqli_error($db));
 	}
 }
 
 // update an entry (visible/crossed out)
 function updatestate($mysql_table, $id, $newstate)
 {
+    global $db;
 	$q = 'UPDATE ' . $mysql_table . ' SET state=' . $newstate . ' WHERE id=' . $id . ';';
-	$ok = mysql_query($q);
+	$ok = mysqli_query($db, $q);
   
 	if (!$ok)
 	{
-		die("Cannot execute query." . mysql_error());
+		die("Cannot execute query." . mysqli_error($db));
 	}
 }
 
 // create the MySQL table
 function createtable($mysql_table)
 {
+    global $db;
 	$q = "CREATE TABLE `" . $mysql_table . "` (" . 
 		"`id` int(3) unsigned NOT NULL AUTO_INCREMENT," .
 		"`title` varchar(20) DEFAULT NULL," . 
@@ -341,10 +347,10 @@ function createtable($mysql_table)
 		"`state` int(3) unsigned DEFAULT NULL," . 
 		"UNIQUE KEY `ID` (`id`)" . 
 		") TYPE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=latin1 COMMENT='RSSlog plugin entries';";
-	$ok = mysql_query($q);
+	$ok = mysqli_query($db, $q);
 	if (!$ok)
 	{
-		die("Failed to create table!" . mysql_error());
+		die("Failed to create table!" . mysqli_error($db));
 	}
 }
 ?>
