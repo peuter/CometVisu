@@ -26,16 +26,14 @@ function stringToXml(text) {
   var xmlDoc;
   if (window.DOMParser) {
     var parser = new DOMParser();
-    xmlDoc = parser.parseFromString(text, 'application/xml');
-  }
-  else {
-    xmlDoc = new ActiveXObject('Microsoft.XMLDOM');
+    xmlDoc = parser.parseFromString(text, "application/xml");
+  } else {
+    xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
     xmlDoc.async = false;
     xmlDoc.loadXML(text);
   }
   return xmlDoc;
 }
-
 
 var timerId = null;
 function debounce(innerFunc, delay) {
@@ -46,43 +44,41 @@ function debounce(innerFunc, delay) {
 }
 
 function saveConfig(filename, data) {
-  return new Promise(function(resolve, reject) {
-    $.ajax('../bin/save_config.php',
-      {
-        dataType: 'json',
-        data: {
-          config: filename,
-          data: JSON.stringify([data]),
-          configType: "string"
-        },
-        type: 'POST',
-        cache: false,
-        success: function (data) {
-          if (!data) {
-            // some weird generic error
-            reject('configuration_saving_error');
-            return;
-          }
+  return new Promise(function (resolve, reject) {
+    $.ajax("../bin/save_config.php", {
+      dataType: "json",
+      data: {
+        config: filename,
+        data: JSON.stringify([data]),
+        configType: "string",
+      },
 
-          if (data.success === false) {
-            // we have an error.
-            var message;
-
-            if (data.message) {
-              message = data.message;
-            }
-            reject("error saving config "+message);
-            return;
-          }
-
-          // everything is pretty cool.
-          resolve('configuration_saving_success');
-
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          reject('configuration_saving_error', textStatus, errorThrown);
+      type: "POST",
+      cache: false,
+      success(data) {
+        if (!data) {
+          // some weird generic error
+          reject("configuration_saving_error");
+          return;
         }
-      }
-    );
+
+        if (data.success === false) {
+          // we have an error.
+          var message;
+
+          if (data.message) {
+            message = data.message;
+          }
+          reject("error saving config " + message);
+          return;
+        }
+
+        // everything is pretty cool.
+        resolve("configuration_saving_success");
+      },
+      error(jqXHR, textStatus, errorThrown) {
+        reject("configuration_saving_error", textStatus, errorThrown);
+      },
+    });
   });
 }

@@ -1,7 +1,7 @@
-/* Info-spec.js 
- * 
+/* Info-spec.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,27 +17,30 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  * Unit tests for info widget
  *
  */
-describe('testing a info widget', function() {
-  it('should test the info creator', function() {
-    const [widget, element] = this.createTestWidgetString('info', {}, '<label>Test</label>');
+describe("testing a info widget", function () {
+  it("should test the info creator", function () {
+    const [widget, element] = this.createTestWidgetString(
+      "info",
+      {},
+      "<label>Test</label>"
+    );
 
-    expect(element).toHaveClass('info');
-    expect(element).toHaveLabel('Test');
-    expect(widget.getPath()).toBe('id_0');
+    expect(element).toHaveClass("info");
+    expect(element).toHaveLabel("Test");
+    expect(widget.getPath()).toBe("id_0");
   });
 
-  it('should update an info widget', function() {
-    var creator = this.createTestElement('info');
+  it("should update an info widget", function () {
+    var creator = this.createTestElement("info");
 
-    creator.update('12/7/37', 1);
+    creator.update("12/7/37", 1);
     var actor = creator.getActor();
 
     expect(actor).not.toBe(null);
-    expect(actor).toHaveValue('1');
+    expect(actor).toHaveValue("1");
   });
 });

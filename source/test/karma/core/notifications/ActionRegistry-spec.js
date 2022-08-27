@@ -1,7 +1,7 @@
-/* ActionRegistry-spec.js 
- * 
+/* ActionRegistry-spec.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,20 +17,28 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
-
-describe('test the ActionRegistry', function () {
-  it('should register an action handler', function() {
-    var actionHandler = function() {
-      this.getDomElement = function() {
-        return 'test';
+describe("test the ActionRegistry", function () {
+  it("should register an action handler", function () {
+    var actionHandler = function () {
+      this.getDomElement = function () {
+        return "test";
       };
     };
 
-    cv.core.notifications.ActionRegistry.registerActionHandler('test', actionHandler);
+    cv.core.notifications.ActionRegistry.registerActionHandler(
+      "test",
+      actionHandler
+    );
 
-    expect(cv.core.notifications.ActionRegistry.createActionElement('unknown')).toBeNull();
-    expect(cv.core.notifications.ActionRegistry.createActionElement('test', new Map())).toEqual('test');
-    cv.core.notifications.ActionRegistry.unregisterActionHandler('test');
+    expect(
+      cv.core.notifications.ActionRegistry.createActionElement("unknown")
+    ).toBeNull();
+    expect(
+      cv.core.notifications.ActionRegistry.createActionElement(
+        "test",
+        new Map()
+      )
+    ).toEqual("test");
+    cv.core.notifications.ActionRegistry.unregisterActionHandler("test");
   });
 });

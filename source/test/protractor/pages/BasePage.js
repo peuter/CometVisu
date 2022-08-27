@@ -1,7 +1,7 @@
-/* BasePage.js 
- * 
+/* BasePage.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -16,7 +16,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
-
 
 /**
  * Wrappers for expected conditions
@@ -39,12 +38,12 @@ class BasePage {
      * wrap this.timeout. (ms) in t-shirt sizes
      */
     this.timeout = {
-      'xs': 420,
-      's': 1000,
-      'm': 2000,
-      'l': 5000,
-      'xl': 9000,
-      'xxl': 15000
+      xs: 420,
+      s: 1000,
+      m: 2000,
+      l: 5000,
+      xl: 9000,
+      xxl: 15000,
     };
   }
 
@@ -54,7 +53,11 @@ class BasePage {
    * @requires a page to include `pageLoaded` method
    */
   at() {
-    return browser.wait(this.pageLoaded(), this.timeout.xl, 'timeout waiting for page to load');
+    return browser.wait(
+      this.pageLoaded(),
+      this.timeout.xl,
+      "timeout waiting for page to load"
+    );
   }
 
   /**
@@ -65,7 +68,7 @@ class BasePage {
    */
   to(urlModification) {
     if (urlModification === undefined) {
-      urlModification = '';
+      urlModification = "";
     }
 
     browser.get(this.url + urlModification, this.timeout.xl);
@@ -117,20 +120,20 @@ class BasePage {
     // Note: as some designs (like "metal") are hiding the h1 the page name
     // must be extracted by this little detour
     return browser.executeAsyncScript(function (callback) {
- callback(document.querySelectorAll('.activePage h1')[0].textContent); 
-});
+      callback(document.querySelectorAll(".activePage h1")[0].textContent);
+    });
   }
 
   // eslint-disable-next-line class-methods-use-this
   getPages() {
-    return element.all(by.css('.page'));
+    return element.all(by.css(".page"));
   }
 
   // eslint-disable-next-line class-methods-use-this
   getPage(name) {
-    return element.all(by.css('.page')).then(function(pages) {
-      return pages.find(function(page) {
-        if (page.element(by.tagName('h1')).getText() === name) {
+    return element.all(by.css(".page")).then(function (pages) {
+      return pages.find(function (page) {
+        if (page.element(by.tagName("h1")).getText() === name) {
           return page;
         }
         return null;
@@ -138,7 +141,8 @@ class BasePage {
     });
   }
 
-  async disablePageAnimations() { // eslint-disable-line class-methods-use-this
+  async disablePageAnimations() {
+    // eslint-disable-line class-methods-use-this
     await browser.driver.executeAsyncScript(function (callback) {
       cv.Config.configSettings.scrollSpeed = 0;
       callback();
@@ -150,7 +154,8 @@ class BasePage {
    * @param name {String}
    * @param force
    */
-  async goToPage(name, force) { // eslint-disable-line class-methods-use-this
+  async goToPage(name, force) {
+    // eslint-disable-line class-methods-use-this
     if (force) {
       await browser.driver.executeAsyncScript(function (name, callback) {
         cv.TemplateEngine.getInstance().scrollToPage(name, 0);
@@ -158,10 +163,10 @@ class BasePage {
       }, name);
     }
     let done = false;
-    const links = await element.all(by.css('.activePage div.pagelink'));
+    const links = await element.all(by.css(".activePage div.pagelink"));
     for (let i = 0; i < links.length; i++) {
-      const actor = links[i].element(by.css('.actor'));
-      const linkName = await actor.element(by.tagName('a')).getText();
+      const actor = links[i].element(by.css(".actor"));
+      const linkName = await actor.element(by.tagName("a")).getText();
       if (linkName === name) {
         done = true;
         actor.click();
@@ -170,7 +175,7 @@ class BasePage {
     }
     if (!done) {
       // not found - probably it was a parent page
-      element.all(by.css('.nav_path > a')).each(function (link) {
+      element.all(by.css(".nav_path > a")).each(function (link) {
         link.getText().then(function (linkName) {
           if (linkName === name) {
             done = true;
@@ -212,8 +217,9 @@ class BasePage {
   sendUpdate(address, value) {
     let data = {
       i: new Date().getTime(),
-      d: {}
+      d: {},
     };
+
     data.d[address] = value;
     return browser.executeAsyncScript(function (data, callback) {
       window._receive(data);
@@ -249,7 +255,7 @@ class BasePage {
   }
 
   getWidgetAddress(path) {
-    this.getWidgetData(path).then(function(data) {
+    this.getWidgetData(path).then(function (data) {
       for (var addr in data.address) {
         return addr;
       }
@@ -257,4 +263,5 @@ class BasePage {
     });
   }
 }
+
 module.exports = BasePage;

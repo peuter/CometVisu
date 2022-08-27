@@ -1,7 +1,7 @@
-/* Urltrigger-spec.js 
- * 
+/* Urltrigger-spec.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,26 +17,32 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  * Unit tests for urltrigger widget
  *
  */
-describe('testing a urltrigger widget', function() {
-  it('should test the urltrigger creator', function() {
-    const [widget, element] = this.createTestWidgetString('urltrigger', {}, '<label>Test</label>');
+describe("testing a urltrigger widget", function () {
+  it("should test the urltrigger creator", function () {
+    const [widget, element] = this.createTestWidgetString(
+      "urltrigger",
+      {},
+      "<label>Test</label>"
+    );
 
-    expect(widget.getPath()).toBe('id_0');
+    expect(widget.getPath()).toBe("id_0");
 
-    expect(element).toHaveClass('trigger');
-    expect(element).toHaveLabel('Test');
+    expect(element).toHaveClass("trigger");
+    expect(element).toHaveLabel("Test");
   });
 
-  it('should test the urltrigger action', function() {
-    var res = this.createTestElement('urltrigger', {url: '/test/test.txt', align: 'center'});
-    spyOn(res.getXhr(), 'send');
+  it("should test the urltrigger action", function () {
+    var res = this.createTestElement("urltrigger", {
+      url: "/test/test.txt",
+      align: "center",
+    });
+    spyOn(res.getXhr(), "send");
 
-    expect(res.getActor()).toHaveClass('center');
+    expect(res.getActor()).toHaveClass("center");
     this.initWidget(res);
 
     res._action();

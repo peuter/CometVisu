@@ -1,7 +1,7 @@
-/* Json-spec.js 
- * 
+/* Json-spec.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -24,10 +24,10 @@
  * @since 2016
  */
 
-describe('test the json fallback parser', function () {
-  it('should parse wrong json data', function() {
+describe("test the json fallback parser", function () {
+  it("should parse wrong json data", function () {
     var res = cv.io.parser.Json.parse('{"0": true}{"1": true}');
 
-    expect(res['1']).toBeTruthy();
+    expect(res["1"]).toBeTruthy();
   });
 });

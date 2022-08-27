@@ -1,7 +1,7 @@
-/* design_setup.js 
- * 
+/* design_setup.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,17 +17,16 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  * Design setup for the planet design
  *
  * @author Christian Mayer
  * @since 2012
  */
-qx.event.message.Bus.subscribe("setup.dom.finished.before", function() {
-  document.querySelector('#navbarLeft').dataset['columns'] = 6;
-  document.querySelector('#navbarLeft').dataset['size'] = '12rem';
-  document.querySelector('#main').dataset['columns'] = 12;
-  document.querySelector('#main').dataset['disableSliderTransform'] = true;
-  document.querySelector('#navbarRight').dataset['columns'] = 6;
+qx.event.message.Bus.subscribe("setup.dom.finished.before", function () {
+  document.querySelector("#navbarLeft").dataset["columns"] = 6;
+  document.querySelector("#navbarLeft").dataset["size"] = "12rem";
+  document.querySelector("#main").dataset["columns"] = 12;
+  document.querySelector("#main").dataset["disableSliderTransform"] = true;
+  document.querySelector("#navbarRight").dataset["columns"] = 6;
 });

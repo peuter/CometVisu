@@ -1,7 +1,7 @@
-/* Web.js 
- * 
+/* Web.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,12 +17,11 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  *
  */
-qx.Class.define('cv.parser.widgets.Web', {
-  type: 'static',
+qx.Class.define("cv.parser.widgets.Web", {
+  type: "static",
 
   /*
   ******************************************************
@@ -39,19 +38,27 @@ qx.Class.define('cv.parser.widgets.Web', {
      * @param flavour {String} Flavour of the widget
      * @param pageType {String} Page type (2d, 3d, ...)
      */
-    parse: function (xml, path, flavour, pageType) {
-      const data = cv.parser.WidgetParser.parseElement(this, xml, path, flavour, pageType, this.getAttributeToPropertyMappings());
+    parse(xml, path, flavour, pageType) {
+      const data = cv.parser.WidgetParser.parseElement(
+        this,
+        xml,
+        path,
+        flavour,
+        pageType,
+        this.getAttributeToPropertyMappings()
+      );
+
       cv.parser.WidgetParser.parseFormat(xml, path);
       cv.parser.WidgetParser.parseAddress(xml, path);
       cv.parser.WidgetParser.parseRefresh(xml, path);
 
-      const ga = xml.getAttribute('ga');
+      const ga = xml.getAttribute("ga");
       if (ga) {
         cv.data.Model.getInstance().addAddress(ga);
-        if (cv.Config.backend === 'openhab') {
-          data.address['_' + ga] = {transform:'OH:switch', mode: 'OFF'};
+        if (cv.Config.backend === "openhab") {
+          data.address["_" + ga] = { transform: "OH:switch", mode: "OFF" };
         } else {
-          data.address['_' + ga] = {transform:'DPT:1.001', mode: 0};
+          data.address["_" + ga] = { transform: "DPT:1.001", mode: 0 };
         }
       }
       return data;
@@ -61,26 +68,26 @@ qx.Class.define('cv.parser.widgets.Web', {
      * Returns a mapping to map XML-Attributes to properties to help the parser to parse the config element.
      * @return {Map}
      */
-    getAttributeToPropertyMappings: function () {
+    getAttributeToPropertyMappings() {
       return {
         address: {},
         width: {},
         height: {},
         frameborder: {
-          transform: function (value) {
-            return value === 'true';
-          }
+          transform(value) {
+            return value === "true";
+          },
         },
+
         background: {},
         src: {},
-        scrolling: {}
+        scrolling: {},
       };
-    }
+    },
   },
 
-  defer: function(statics) {
+  defer(statics) {
     // register the parser
-    cv.parser.WidgetParser.addHandler('web', statics);
-  }
+    cv.parser.WidgetParser.addHandler("web", statics);
+  },
 });
-

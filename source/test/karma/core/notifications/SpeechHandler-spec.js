@@ -1,7 +1,7 @@
-/* SpeechHandler-spec.js 
- * 
+/* SpeechHandler-spec.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,24 +17,23 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
-
-describe('test the SpeechHandler', function () {
+describe("test the SpeechHandler", function () {
   var handler = null;
   var spiedSay = null;
 
-  beforeEach(function() {
+  beforeEach(function () {
     handler = cv.core.notifications.SpeechHandler.getInstance();
-    spyOn(handler, 'say');
+    spyOn(handler, "say");
   });
 
-  it('should handle a message', function() {
+  it("should handle a message", function () {
     var message = {
-      topic: 'cv.test',
-      message: 'test message'
+      topic: "cv.test",
+      message: "test message",
     };
+
     var config = {
-      skipInitial: true
+      skipInitial: true,
     };
 
     handler.handleMessage(message, config);
@@ -47,12 +46,12 @@ describe('test the SpeechHandler', function () {
     expect(handler.say).toHaveBeenCalled();
     handler.say.calls.reset();
 
-    message.message = '';
+    message.message = "";
     // nothing to say
     handler.handleMessage(message, config);
 
     expect(handler.say).not.toHaveBeenCalled();
-    message.message = 'test message';
+    message.message = "test message";
 
     // test condition
     message.condition = false;
@@ -71,7 +70,7 @@ describe('test the SpeechHandler', function () {
 
     expect(handler.say).not.toHaveBeenCalled();
     // override by text
-    message.message = '!'+message.message;
+    message.message = "!" + message.message;
     handler.handleMessage(message, config);
 
     expect(handler.say).toHaveBeenCalled();

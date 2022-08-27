@@ -1,7 +1,7 @@
-/* Rgb-spec.js 
- * 
+/* Rgb-spec.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,39 +17,63 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  * Unit tests for rgb widget
  *
  */
-describe('testing a rgb widget', function() {
-  it('should test the rgb creator', function() {
-    const [widget, element] = this.createTestWidgetString('rgb', {}, '<label>Test</label>');
+describe("testing a rgb widget", function () {
+  it("should test the rgb creator", function () {
+    const [widget, element] = this.createTestWidgetString(
+      "rgb",
+      {},
+      "<label>Test</label>"
+    );
 
-    expect(widget.getPath()).toBe('id_0');
+    expect(widget.getPath()).toBe("id_0");
 
-    expect(element).toHaveClass('rgb');
-    expect(element).toHaveLabel('Test');
+    expect(element).toHaveClass("rgb");
+    expect(element).toHaveLabel("Test");
   });
 
-  it('should test the RGB update in R variant', function() {
-    var widgetInstance = this.createTestElement('rgb', {}, null, 'Test', {variant: 'r', transform: 'OH:Number'});
-    widgetInstance.update('Test', 255);
+  it("should test the RGB update in R variant", function () {
+    var widgetInstance = this.createTestElement("rgb", {}, null, "Test", {
+      variant: "r",
+      transform: "OH:Number",
+    });
+    widgetInstance.update("Test", 255);
 
-    expect(window.getComputedStyle(widgetInstance.getValueElement())['background-color']).toBe('rgb(255, 0, 0)');
+    expect(
+      window.getComputedStyle(widgetInstance.getValueElement())[
+        "background-color"
+      ]
+    ).toBe("rgb(255, 0, 0)");
   });
 
-  it('should test the RGB update in G variant', function() {
-    var widgetInstance = this.createTestElement('rgb', {}, null, 'Test', {variant: 'g', transform: 'OH:Number'});
-    widgetInstance.update('Test', 255);
+  it("should test the RGB update in G variant", function () {
+    var widgetInstance = this.createTestElement("rgb", {}, null, "Test", {
+      variant: "g",
+      transform: "OH:Number",
+    });
+    widgetInstance.update("Test", 255);
 
-    expect(window.getComputedStyle(widgetInstance.getValueElement())['background-color']).toBe('rgb(0, 255, 0)');
+    expect(
+      window.getComputedStyle(widgetInstance.getValueElement())[
+        "background-color"
+      ]
+    ).toBe("rgb(0, 255, 0)");
   });
 
-  it('should test the RGB update in B variant', function() {
-    var widgetInstance = this.createTestElement('rgb', {}, null, 'Test', {variant: 'b', transform: 'OH:Number'});
-    widgetInstance.update('Test', 255);
+  it("should test the RGB update in B variant", function () {
+    var widgetInstance = this.createTestElement("rgb", {}, null, "Test", {
+      variant: "b",
+      transform: "OH:Number",
+    });
+    widgetInstance.update("Test", 255);
 
-    expect(window.getComputedStyle(widgetInstance.getValueElement())['background-color']).toBe('rgb(0, 0, 255)');
+    expect(
+      window.getComputedStyle(widgetInstance.getValueElement())[
+        "background-color"
+      ]
+    ).toBe("rgb(0, 0, 255)");
   });
 });

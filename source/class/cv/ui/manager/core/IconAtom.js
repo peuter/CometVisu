@@ -1,7 +1,7 @@
-/* IconAtom.js 
- * 
+/* IconAtom.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,11 +17,10 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  * Atom with cv.ui.manager.viewer.SvgIcon instead ob an qx.ui.basic.Image
  */
-qx.Class.define('cv.ui.manager.core.IconAtom', {
+qx.Class.define("cv.ui.manager.core.IconAtom", {
   extend: qx.ui.basic.Atom,
 
   /*
@@ -32,8 +31,8 @@ qx.Class.define('cv.ui.manager.core.IconAtom', {
   properties: {
     appearance: {
       refine: true,
-      init: 'cv-icon'
-    }
+      init: "cv-icon",
+    },
   },
 
   /*
@@ -42,35 +41,38 @@ qx.Class.define('cv.ui.manager.core.IconAtom', {
   ***********************************************
   */
   members: {
-    _applyLabel: function (value) {
-      this.base(arguments, value);
-      this.getChildControl('icon').setName(value);
+    _applyLabel(value) {
+      super._applyLabel(value);
+      this.getChildControl("icon").setName(value);
     },
 
     /**
      * Updates the visibility of the icon
      */
-    _handleIcon : function() {
-      if (!this.getChildControl('icon').getName() || this.getShow() === 'label') {
-        this._excludeChildControl('icon');
+    _handleIcon() {
+      if (
+        !this.getChildControl("icon").getName() ||
+        this.getShow() === "label"
+      ) {
+        this._excludeChildControl("icon");
       } else {
-        this._showChildControl('icon');
+        this._showChildControl("icon");
       }
     },
 
     // overridden
-    _createChildControlImpl : function(id) {
+    _createChildControlImpl(id) {
       let control;
 
       switch (id) {
-         case 'icon':
-           control = new cv.ui.manager.viewer.SvgIcon();
-           control.setAnonymous(true);
-           this._addAt(control, 0);
-           break;
-       }
+        case "icon":
+          control = new cv.ui.manager.viewer.SvgIcon();
+          control.setAnonymous(true);
+          this._addAt(control, 0);
+          break;
+      }
 
-       return control || this.base(arguments, id);
-    }
-  }
+      return control || super._createChildControlImpl(id);
+    },
+  },
 });

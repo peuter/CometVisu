@@ -23,15 +23,15 @@
  * @since 0.11.0
  * @author Tobias Bräutigam
  */
-importScripts('xmllint.js');
-importScripts('crc32.js');
+importScripts("xmllint.js");
+importScripts("crc32.js");
 
 let configSchema;
 
-function getFileContent (path) {
+function getFileContent(path) {
   try {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', path, false); // Note: synchronous
+    xhr.open("GET", path, false); // Note: synchronous
     xhr.send();
     if (xhr.status === 200) {
       return xhr.response;
@@ -39,7 +39,7 @@ function getFileContent (path) {
       console.error("XHR Error for ", path, xhr.status, xhr.statusText);
       return null;
     }
-  } catch(e) {
+  } catch (e) {
     console.error("XHR Error for ", path, e.toString());
     return null;
   }
@@ -53,16 +53,19 @@ class SourceFile {
     this.currentHash = null;
     this.isConfigFile = /visu_config.*\.xml$/.test(path);
 
-    this.features = Object.assign({
-      hash: true,
-      validate: true,
-      modified: true,
-      initialValidation: false
-    }, features || {});
+    this.features = Object.assign(
+      {
+        hash: true,
+        validate: true,
+        modified: true,
+        initialValidation: false,
+      },
+      features || {}
+    );
 
     if (this.isConfigFile && !configSchema) {
       // load scheme file
-      configSchema = getFileContent('../visu_config.xsd');
+      configSchema = getFileContent("../visu_config.xsd");
     }
   }
 
@@ -103,11 +106,15 @@ class SourceFile {
     }
     if (this.features.modified) {
       // check modifications
-      postMessage(["modified", {
-        modified: (this.currentHash !== this.initialHash),
-        currentHash: this.currentHash,
-        initialHash: this.initialHash
-      }, this.path]);
+      postMessage([
+        "modified",
+        {
+          modified: this.currentHash !== this.initialHash,
+          currentHash: this.currentHash,
+          initialHash: this.initialHash,
+        },
+        this.path,
+      ]);
     } else if (this.features.hash) {
       postMessage(["hash", this.currentHash, this.path]);
     }
@@ -123,8 +130,9 @@ class SourceFile {
     if ((this.features.validate || force) && this.isConfigFile) {
       const lint = xmllint.validateXML({
         xml: code,
-        schema: configSchema
+        schema: configSchema,
       });
+
       postMessage(["errors", parseErrors(code, lint.errors), this.path]);
     }
   }
@@ -132,21 +140,27 @@ class SourceFile {
   checkModification(lines, changes) {
     var decorations = [];
 
-    changes.forEach(function(change) {
-      for (var i=change.range.startLineNumber; i<=change.range.endLineNumber; i++) {
+    changes.forEach(function (change) {
+      for (
+        var i = change.range.startLineNumber;
+        i <= change.range.endLineNumber;
+        i++
+      ) {
         if (this.initialCode[i] !== lines[i]) {
           decorations.push({
             range: {
-              startLineNumber: change.range.startLineNumber+1,
-              endLineNumber: change.range.endLineNumber+1,
+              startLineNumber: change.range.startLineNumber + 1,
+              endLineNumber: change.range.endLineNumber + 1,
               startColumn: 1,
-              endColumn: 1
+              endColumn: 1,
             },
+
             options: {
               isWholeLine: true,
-              linesDecorationsClassName: 'modified-line'
-            }
+              linesDecorationsClassName: "modified-line",
+            },
           });
+
           break;
         }
       }
@@ -167,7 +181,8 @@ class SourceFile {
 // mapping calls to SourceFile instances
 const openFiles = {};
 
-function openFile(data, features) { // jshint ignore:line
+function openFile(data, features) {
+  // jshint ignore:line
   if (!openFiles.hasOwnProperty(data.path)) {
     const source = new SourceFile(data.path, features);
     openFiles[data.path] = source;
@@ -175,16 +190,18 @@ function openFile(data, features) { // jshint ignore:line
   openFiles[data.path].open(data);
 }
 
-function closeFile(data) { // jshint ignore:line
+function closeFile(data) {
+  // jshint ignore:line
   delete openFiles[data.path];
 }
 
-function contentChange(data) { // jshint ignore:line
+function contentChange(data) {
+  // jshint ignore:line
   if (openFiles.hasOwnProperty(data.path)) {
     const source = openFiles[data.path];
     source.contentChange(data);
   } else {
-    console.error('no open file found for path', data.path);
+    console.error("no open file found for path", data.path);
   }
 }
 
@@ -195,12 +212,12 @@ function getPath(lineElementMap, lineNo) {
     let parent = child.parent;
     while (parent) {
       parts.unshift(`${parent.name}[${parent.children.indexOf(child)}]`);
-      child = parent
+      child = parent;
       parent = child.parent;
     }
-    return '/' + parts.join('/');
+    return "/" + parts.join("/");
   }
-  return '';
+  return "";
 }
 
 function parseErrors(content, errors, includePaths) {
@@ -233,7 +250,7 @@ function parseErrors(content, errors, includePaths) {
             const endOfComment = line.indexOf("-->", i);
             i++;
             if (endOfComment >= i) {
-              i = endOfComment+2;
+              i = endOfComment + 2;
               context = oldContext;
               continue;
             } else {
@@ -242,7 +259,7 @@ function parseErrors(content, errors, includePaths) {
             }
           } else if (line[i + 1] === "/") {
             // close tag
-            context = ""
+            context = "";
             if (currentParent) {
               currentElement = currentParent;
               currentParent = currentElement.parent;
@@ -251,7 +268,7 @@ function parseErrors(content, errors, includePaths) {
             i++;
             continue;
           } else if (line[i + 1] === "?") {
-            context = "header"
+            context = "header";
             // skip header
             i = line.indexOf(">", i + 1) + 1;
           } else {
@@ -263,20 +280,25 @@ function parseErrors(content, errors, includePaths) {
             if (currentElement) {
               currentParent = currentElement;
             }
-            currentElement = { line: lineNo+1, name: match[1], children: [], parent: currentParent };
+            currentElement = {
+              line: lineNo + 1,
+              name: match[1],
+              children: [],
+              parent: currentParent,
+            };
             if (currentParent) {
-              currentParent.children.push(currentElement)
+              currentParent.children.push(currentElement);
             }
             if (!root) {
               root = currentElement;
             }
-            lineElementMap.set(lineNo+1, currentElement);
+            lineElementMap.set(lineNo + 1, currentElement);
             let endIndex = line.indexOf(`</${currentElement.name}>`, i);
             if (endIndex === -1) {
               let endTag = line.substr(i).search(">");
               if (endTag >= 0) {
-                endTag+=i;
-                if (line.substr(endTag-1, 1) === "/") {
+                endTag += i;
+                if (line.substr(endTag - 1, 1) === "/") {
                   // position pointer before the /
                   endIndex = endTag - 2;
                 } else {
@@ -289,7 +311,7 @@ function parseErrors(content, errors, includePaths) {
             }
           }
         } else if (line[i] === "/") {
-          context = ""
+          context = "";
           if (currentParent) {
             currentElement = currentParent;
             currentParent = currentElement.parent;
@@ -299,7 +321,7 @@ function parseErrors(content, errors, includePaths) {
       }
     });
   }
-  errors.forEach(error => {
+  errors.forEach((error) => {
     if (/.*\.xml:[\d]+:.+/.test(error)) {
       const parts = error.split(":");
       const file = parts.shift();
@@ -308,7 +330,7 @@ function parseErrors(content, errors, includePaths) {
       let title, message;
       if (errorType === "parser error") {
         const end = parts[parts.length - 1];
-        title= errorType;
+        title = errorType;
         message = parts.join(": ");
         const lineMatch = /.+line ([\d]+).+/.exec(end);
         if (lineMatch) {
@@ -324,9 +346,13 @@ function parseErrors(content, errors, includePaths) {
           path: getPath(lineElementMap, lineNo),
           startColumn: Math.max(0, source.search(/[^\s]/)),
           endColumn: source.length,
-          original: error
+          original: error,
         };
-        err.source = source.substr(err.startColumn, err.endColumn - err.startColumn);
+
+        err.source = source.substr(
+          err.startColumn,
+          err.endColumn - err.startColumn
+        );
         // in editors columns start counting at 1
         err.startColumn++;
         err.endColumn++;
@@ -335,7 +361,9 @@ function parseErrors(content, errors, includePaths) {
         title = parts.shift().trim();
         const position = parts.shift().trim();
         message = parts.join(":").trim();
-        const posMatch = /^Element '([^']+)'(,\sattribute '([^']+)')?/.exec(position);
+        const posMatch = /^Element '([^']+)'(,\sattribute '([^']+)')?/.exec(
+          position
+        );
         // in the last part there might be a more precise line number for the error
         const lineMatch = /.+line ([\d]+) -+/.exec(message);
         if (lineMatch) {
@@ -345,7 +373,7 @@ function parseErrors(content, errors, includePaths) {
         const source = contentLines[lineNo - 1];
         if (posMatch) {
           element = posMatch[1];
-          attribute = posMatch.length > 3 ? posMatch[3] : null
+          attribute = posMatch.length > 3 ? posMatch[3] : null;
           const err = {
             line: lineNo,
             title: title,
@@ -355,14 +383,21 @@ function parseErrors(content, errors, includePaths) {
             path: getPath(lineElementMap, lineNo),
             startColumn: Math.max(0, source.indexOf(element) - 1),
             endColumn: source.length,
-            original: error
+            original: error,
           };
+
           if (attribute && source.indexOf(attribute) >= 0) {
             err.startColumn = source.indexOf(attribute + "=");
-            const attrMatch = /^(="[^"]*").*/.exec(source.substr(err.startColumn + attribute.length));
-            err.endColumn = err.startColumn + attribute.length + attrMatch[1].length;
+            const attrMatch = /^(="[^"]*").*/.exec(
+              source.substr(err.startColumn + attribute.length)
+            );
+            err.endColumn =
+              err.startColumn + attribute.length + attrMatch[1].length;
           }
-          err.source = source.substr(err.startColumn, err.endColumn - err.startColumn);
+          err.source = source.substr(
+            err.startColumn,
+            err.endColumn - err.startColumn
+          );
           // in editors columns start counting at 1
           err.startColumn++;
           err.endColumn++;
@@ -378,19 +413,24 @@ function parseErrors(content, errors, includePaths) {
   return parsedErrors;
 }
 
-function validateConfig (data) {
-  const url = data.path.startsWith('http') ? data.path : '../../' + data.path;
+function validateConfig(data) {
+  const url = data.path.startsWith("http") ? data.path : "../../" + data.path;
   const content = getFileContent(url);
   if (content) {
     if (!configSchema) {
-      configSchema = getFileContent('../visu_config.xsd');
+      configSchema = getFileContent("../visu_config.xsd");
     }
     const lint = xmllint.validateXML({
       xml: content,
-      schema: configSchema
+      schema: configSchema,
     });
+
     if (lint.errors) {
-      postMessage(["validationResult", parseErrors(content, lint.errors), data.path]);
+      postMessage([
+        "validationResult",
+        parseErrors(content, lint.errors),
+        data.path,
+      ]);
     } else {
       postMessage(["validationResult", true, data.path]);
     }
@@ -399,16 +439,21 @@ function validateConfig (data) {
 
 function validateXmlConfig(id, content, includePaths) {
   if (!configSchema) {
-    configSchema = getFileContent('../visu_config.xsd');
+    configSchema = getFileContent("../visu_config.xsd");
   }
   const lint = xmllint.validateXML({
     xml: content,
-    schema: configSchema
+    schema: configSchema,
   });
+
   if (!includePaths || !lint.errors) {
     postMessage(["validationResult", lint.errors || true, id]);
   } else if (lint.errors) {
-    postMessage(["validationResult", parseErrors(content, lint.errors, includePaths), id]);
+    postMessage([
+      "validationResult",
+      parseErrors(content, lint.errors, includePaths),
+      id,
+    ]);
   } else {
     postMessage(["validationResult", true, id]);
   }
@@ -417,7 +462,7 @@ function validateXmlConfig(id, content, includePaths) {
 /**
  * Handle messages from application
  */
-onmessage = function(ev) {
+onmessage = function (ev) {
   var topic = ev.data.shift();
   if (topic in this) {
     // dispatch message to handler

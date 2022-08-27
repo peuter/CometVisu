@@ -1,7 +1,7 @@
-/* Break-spec.js 
- * 
+/* Break-spec.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,18 +17,17 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  * Unit tests for break widget
  *
  * @author Tobias Bräutigam
  * @since 2016
  */
-describe('testing a break', function() {
-  it('should test the break creator', function() {
-    const [widget, element] = this.createTestWidgetString('break');
+describe("testing a break", function () {
+  it("should test the break creator", function () {
+    const [widget, element] = this.createTestWidgetString("break");
 
-    expect(element.tagName.toLowerCase()).toBe('br');
-    expect(widget.getPath()).toBe('id_0');
+    expect(element.tagName.toLowerCase()).toBe("br");
+    expect(widget.getPath()).toBe("id_0");
   });
 });

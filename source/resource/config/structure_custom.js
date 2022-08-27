@@ -18,7 +18,7 @@
 /**
  * This module defines the custom widget additions to the CometVisu visualisation.
  * @module Structure custom
-*/
+ */
 /*
 * Custom changes could go here and look e.g. like
 *

@@ -1,6 +1,3 @@
-
-
-
 /**
  * <h3>Pure widgets</h3>
  *

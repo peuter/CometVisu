@@ -1,7 +1,7 @@
-/* Model.js 
- * 
+/* Model.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,7 +17,6 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  * Internal Model which holds all relevant data like addresses and widgetData
  * and the states. Widget can add themselves as listeners to updates of certain addresses.
@@ -25,16 +24,16 @@
  * @author Tobias Bräutigam
  * @since 0.11.0 (2017)
  */
-qx.Class.define('cv.data.Model', {
+qx.Class.define("cv.data.Model", {
   extend: qx.core.Object,
-  type: 'singleton',
+  type: "singleton",
 
   /*
   ******************************************************
     CONSTRUCTOR
   ******************************************************
   */
-  construct: function() {
+  construct() {
     this.__states = {};
     this.__stateListeners = {};
     this.__addressList = {};
@@ -50,13 +49,13 @@ qx.Class.define('cv.data.Model', {
     READ: 1,
     WRITE: 2,
 
-    isReadAddress: function(address) {
+    isReadAddress(address) {
       return !!(address.mode & cv.data.Model.READ);
     },
 
-    isWriteAddress: function(address) {
+    isWriteAddress(address) {
       return !!(address.mode & cv.data.Model.WRITE);
-    }
+    },
   },
 
   /*
@@ -65,12 +64,12 @@ qx.Class.define('cv.data.Model', {
   ******************************************************
   */
   members: {
-    __states : null,
+    __states: null,
     __stateListeners: null,
-    __addressList : null,
+    __addressList: null,
     __widgetData: null,
 
-    getStateListener: function () {
+    getStateListener() {
       return this.__stateListeners;
     },
 
@@ -80,13 +79,17 @@ qx.Class.define('cv.data.Model', {
      * @param address {String} KNX-GA or openHAB item name
      * @param state {var} new state
      */
-    onUpdate: function(address, state) {
-      const initial = !Object.prototype.hasOwnProperty.call(this.__states, address);
+    onUpdate(address, state) {
+      const initial = !Object.prototype.hasOwnProperty.call(
+        this.__states,
+        address
+      );
+
       const changed = initial || this.__states[address] !== state;
       this.__states[address] = state;
       // notify listeners
       if (this.__stateListeners[address]) {
-        this.__stateListeners[address].forEach(function(listener) {
+        this.__stateListeners[address].forEach(function (listener) {
           listener[0].call(listener[1], address, state, initial, changed);
         }, this);
       }
@@ -96,12 +99,12 @@ qx.Class.define('cv.data.Model', {
      * Handle incoming data from backend
      * @param data {Map} Key/value map of address/state
      */
-    update: function(data) {
+    update(data) {
       if (!data) {
- return; 
-}
+        return;
+      }
       const addressList = this.__addressList;
-      Object.getOwnPropertyNames(data).forEach(function(address) {
+      Object.getOwnPropertyNames(data).forEach(function (address) {
         if (Object.prototype.hasOwnProperty.call(addressList, address)) {
           this.onUpdate(address, data[address]);
         }
@@ -114,7 +117,7 @@ qx.Class.define('cv.data.Model', {
      * @param address {String} KNX-GA or openHAB item name
      * @return {var}
      */
-    getState: function(address) {
+    getState(address) {
       return this.__states[address];
     },
 
@@ -125,7 +128,7 @@ qx.Class.define('cv.data.Model', {
      * @param callback {Function} called on updates
      * @param context {Object} context of the callback
      */
-    addUpdateListener: function(address, callback, context) {
+    addUpdateListener(address, callback, context) {
       if (!this.__stateListeners[address]) {
         this.__stateListeners[address] = [];
       }
@@ -139,10 +142,10 @@ qx.Class.define('cv.data.Model', {
      * @param callback {Function} called on updates
      * @param context {Object} context of the callback
      */
-    removeUpdateListener: function(address, callback, context) {
+    removeUpdateListener(address, callback, context) {
       if (this.__stateListeners[address]) {
         let removeIndex = -1;
-        this.__stateListeners[address].some(function(entry, i) {
+        this.__stateListeners[address].some(function (entry, i) {
           if (entry[0] === callback && entry[1] === context) {
             removeIndex = i;
             return true;
@@ -163,7 +166,7 @@ qx.Class.define('cv.data.Model', {
      * @param address {String} KNX-GA or openHAB item name
      * @param id {String} path to the widget
      */
-    addAddress: function (address, id) {
+    addAddress(address, id) {
       const list = this.__addressList;
       if (address in list) {
         list[address].push(id);
@@ -176,7 +179,7 @@ qx.Class.define('cv.data.Model', {
      * Get the addresses as Array.
      * @return {Map} Address -> path mapping
      */
-    getAddresses: function () {
+    getAddresses() {
       return Object.keys(this.__addressList);
     },
 
@@ -184,7 +187,7 @@ qx.Class.define('cv.data.Model', {
      * Setter for address list.
      * @param value {Map} Address -> path mapping
      */
-    setAddressList: function(value) {
+    setAddressList(value) {
       this.__addressList = value;
     },
 
@@ -192,7 +195,7 @@ qx.Class.define('cv.data.Model', {
      * Getter for the address list.
      * @return {Map} Address -> path mapping
      */
-    getAddressList: function() {
+    getAddressList() {
       return this.__addressList;
     },
 
@@ -200,7 +203,7 @@ qx.Class.define('cv.data.Model', {
      * Clears the current address list.
      * @internal
      */
-    resetAddressList: function() {
+    resetAddressList() {
       this.__addressList = {};
     },
 
@@ -209,22 +212,21 @@ qx.Class.define('cv.data.Model', {
      * @param path {String} widget path
      * @return {Map} widget data map
      */
-    getWidgetData: function (path) {
+    getWidgetData(path) {
       return this.__widgetData[path] || (this.__widgetData[path] = {});
     },
-
 
     /**
      * Return (reference to) widget data by element
      * @param element {Element} DOM-Element to retrieve the widgetData for
      * @return {Map} widget data Map
      */
-    getWidgetDataByElement: function (element) {
+    getWidgetDataByElement(element) {
       const parent = element.parentNode;
-      let path = parent.getAttribute('id');
+      let path = parent.getAttribute("id");
 
       if (path === undefined) {
-        path = parent.parentNode.getAttribute('id');
+        path = parent.parentNode.getAttribute("id");
       }
       return this.getWidgetData(path);
     },
@@ -236,10 +238,10 @@ qx.Class.define('cv.data.Model', {
      * @param obj {Map} data to store
      * @return {Map} updated widget data map
      */
-    setWidgetData: function (path, obj) {
+    setWidgetData(path, obj) {
       const data = this.getWidgetData(path);
 
-      Object.getOwnPropertyNames(obj).forEach(function(attrname) {
+      Object.getOwnPropertyNames(obj).forEach(function (attrname) {
         data[attrname] = obj[attrname];
       }, this);
       return data;
@@ -249,7 +251,7 @@ qx.Class.define('cv.data.Model', {
      * Setter for widget data model
      * @param value {Map} path -> widget data map
      */
-    setWidgetDataModel: function(value) {
+    setWidgetDataModel(value) {
       this.__widgetData = value;
     },
 
@@ -257,7 +259,7 @@ qx.Class.define('cv.data.Model', {
      * Getter for widget data model
      * @return {Map} path -> widget data map
      */
-    getWidgetDataModel: function() {
+    getWidgetDataModel() {
       return this.__widgetData;
     },
 
@@ -265,7 +267,7 @@ qx.Class.define('cv.data.Model', {
      * Clear the widget data model.
      * @internal
      */
-    resetWidgetDataModel: function() {
+    resetWidgetDataModel() {
       this.__widgetData = {};
     },
 
@@ -273,12 +275,11 @@ qx.Class.define('cv.data.Model', {
      * Clear the model, internal method for testing purposes
      * @internal
      */
-    clear: function() {
+    clear() {
       this.__addressList = {};
       this.__widgetData = {};
       this.__states = {};
       this.__stateListeners = {};
-    }
-  }
-
+    },
+  },
 });

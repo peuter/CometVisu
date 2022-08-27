@@ -1,7 +1,7 @@
-/* Text-spec.js 
- * 
+/* Text-spec.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -17,26 +17,29 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  */
 
-
 /**
  * Unit tests for text widget
  *
  * @author Tobias Bräutigam
  * @since 2016
  */
-describe('testing a text widget', function() {
-  it('should test the text creator', function() {
-    const [widget, element] = this.createTestWidgetString('text', {}, '<label>Test</label>');
+describe("testing a text widget", function () {
+  it("should test the text creator", function () {
+    const [widget, element] = this.createTestWidgetString(
+      "text",
+      {},
+      "<label>Test</label>"
+    );
 
-    expect(widget.getPath()).toBe('id_0');
+    expect(widget.getPath()).toBe("id_0");
 
-    expect(element).toHaveClass('text');
+    expect(element).toHaveClass("text");
     // the text widget does not add the 'label' class to the label-div, so the toHaveLabel
     // helper does not work here and we have to check it manually
-    var label = Array.from(element.children).filter(function(m) {
-      return m.matches('div');
+    var label = Array.from(element.children).filter(function (m) {
+      return m.matches("div");
     })[0];
 
-    expect(label.innerText).toBe('Test');
+    expect(label.innerText).toBe("Test");
   });
 });

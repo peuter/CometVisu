@@ -1,7 +1,7 @@
-/* conf.js 
- * 
+/* conf.js
+ *
  * copyright (c) 2010-2022, Christian Mayer and the CometVisu contributers.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -24,37 +24,34 @@
  * @since 2016
  */
 exports.config = {
-  framework: 'jasmine',
+  framework: "jasmine",
 
   // so not use a selenium server
   directConnect: true,
 
   suites: {
-    common: ['specs/d*spec.js'],
-    widgets: ['specs/widgets/*spec.js']
+    common: ["specs/d*spec.js"],
+    widgets: ["specs/widgets/*spec.js"],
   },
+
   capabilities: {
-    browserName: 'chrome',
-    'chromeOptions': {
+    browserName: "chrome",
+    chromeOptions: {
       binary: process.env.CHROME_BIN,
-      args: [
-        '--headless',
-        '--disable-gpu',
-        '--window-size=1024,800'
-      ]
-    }
+      args: ["--headless", "--disable-gpu", "--window-size=1024,800"],
+    },
   },
 
   jasmineNodeOpts: {
-    showColors: true // Use colors in the command line report.
+    showColors: true, // Use colors in the command line report.
   },
 
-  onPrepare: function() {
+  onPrepare() {
     browser.waitForAngularEnabled(false);
 
     // set implicit wait times in ms...
     browser.manage().timeouts().implicitlyWait(5000);
     // set browser size...
     browser.manage().window().setSize(1024, 800);
-  }
+  },
 };
