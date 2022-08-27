@@ -491,7 +491,7 @@ qx.Class.define("cv.ui.manager.form.FileListItem", {
             anonymous: true,
             font: "title",
             textAlign: "center",
-            textColor: "background-main",
+            textColor: "surface",
             minWidth: 70,
           });
 

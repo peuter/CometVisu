@@ -18,7 +18,7 @@
  */
 
 qx.Theme.define("cv.theme.dark.Decoration", {
-  extend: osparc.theme.common.Decoration,
+  extend: qx.theme.tangible.Decoration,
 
   decorations: {
     "window-caption-active": {},
@@ -26,7 +26,7 @@ qx.Theme.define("cv.theme.dark.Decoration", {
     "cv-editor-config-section": {
       style: {
         width: 1,
-        color: "material-textfield",
+        color: "primary-focused",
       },
     },
 
@@ -38,7 +38,7 @@ qx.Theme.define("cv.theme.dark.Decoration", {
 
     "cv-snackbar-msg-error": {
       style: {
-        backgroundColor: "material-textfield-invalid",
+        backgroundColor: "error-focused",
       },
     },
 
@@ -52,14 +52,14 @@ qx.Theme.define("cv.theme.dark.Decoration", {
     "file-action-button": {
       style: {
         width: 1,
-        color: "text",
+        color: "text-on-primary",
       },
     },
 
     "cv-start-section-title": {
       style: {
         width: [1, 0, 0, 0],
-        color: "text-placeholder",
+        color: "text-on-secondary",
       },
     },
 
@@ -76,7 +76,7 @@ qx.Theme.define("cv.theme.dark.Decoration", {
     "cv-file-item-add-file": {
       style: {
         width: 1,
-        color: "text",
+        color: "text-on-primary",
         style: "dashed",
       },
     },
@@ -99,7 +99,7 @@ qx.Theme.define("cv.theme.dark.Decoration", {
       include: "round-button",
       style: {
         width: 4,
-        color: "button-border-hovered",
+        color: "primary-hovered",
       },
     },
   },

@@ -31,8 +31,6 @@
     "johnspackman/UploadMgr": "^2.0.0",
     "qooxdoo/qxl.versionlabel": "^2.0.0",
     "qooxdoo/qxl.apiviewer": "^2.0.0",
-    "ITISFoundation/qx-osparc-theme": "^0.6.0",
-    "ITISFoundation/qx-iconfont-material": "^0.1.7",
     "qooxdoo/qxl.dialog": "^5.0.0"
   },
   "externalResources": {
