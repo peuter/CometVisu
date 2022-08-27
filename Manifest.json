@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/qooxdoo/qooxdoo-compiler/master/source/resource/qx/tool/schema/Manifest-1-0-0.json",
+  "$schema": "https://qooxdoo.org/schema/Manifest-2-0-0.json",
   "info": {
     "name": "cv",
     "summary": "CometVisu",
@@ -27,8 +27,7 @@
     "translation": "source/translation"
   },
   "requires": {
-    "@qooxdoo/framework": "^6.0.2",
-    "@qooxdoo/compiler": "^1.0.3",
+    "@qooxdoo/framework": "^7.2.1",
     "johnspackman/UploadMgr": "^1.0.5",
     "qooxdoo/qxl.versionlabel": "^1.0.4",
     "qooxdoo/qxl.apiviewer": "^1.0.18",

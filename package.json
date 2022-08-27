@@ -39,7 +39,6 @@
     "@babel/polyfill": "^7.8.7",
     "@openapitools/openapi-generator-cli": "^2.4.25",
     "@prettier/plugin-php": "^0.17.6",
-    "@qooxdoo/compiler": "^1.0.4",
     "chmodr": "^1.2.0",
     "coffeescript": "^2.6.1",
     "csso": "^4.2.0",
@@ -88,6 +87,7 @@
     "xml-js": "^1.6.11"
   },
   "dependencies": {
+    "@qooxdoo/framework": "^7.2.1",
     "@sentry/browser": "^6.17.9",
     "@sentry/tracing": "^6.17.9",
     "crc-32": "^1.2.0",
