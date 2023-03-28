@@ -1,5 +1,11 @@
 ## Change Log
 
+0.12.2
+======
+
+- [#1318](https://github.com/CometVisu/CometVisu/pull/1318) Fixes for web-widget and speech plugin (@peuter)
+- [#1313](https://github.com/CometVisu/CometVisu/pull/1313) Do not process influx data by backend processors, because it is alreal… (@peuter)
+
 0.12.1
 ======
 
