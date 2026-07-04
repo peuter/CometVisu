@@ -211,8 +211,10 @@ qx.Class.define('cv.io.transport.LongPolling', {
         data = json.d;
         this.readResendHeaderValues();
         this.client.update(data);
+        if (this.__backendErrorRetryCount > 0) {
+          this.client.showError(cv.io.Client.ERROR_CODES.BACKEND_ERROR, null); // clear self-healing notification
+        }
         this.__backendErrorRetryCount = 0; // reset on success
-        this.client.showError(cv.io.Client.ERROR_CODES.BACKEND_ERROR, null); // clear self-healing notification
         this.retryCounter = 0;
         this.client.setDataReceived(true);
         this.client.setConnected(true);
